@@ -1,0 +1,1206 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Minnetrening</title>
+<meta name="theme-color" content="#17151b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Minnetrening">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+
+<style>
+/* Alt er lokalt: ingen fonter, bilder eller skript fra nett. */
+:root{
+  --serif:ui-serif,"New York","Iowan Old Style",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --didone:Didot,"Bodoni 72","Bodoni MT",ui-serif,Georgia,serif;
+  --cp:#a9c4e2; /* person: blå */
+  --ca:#b3cea4; /* handling (action): grønn */
+  --co:#e4c68e; /* objekt: gull */
+  --cp-bg:rgba(169,196,226,.16);--ca-bg:rgba(179,206,164,.16);--co-bg:rgba(228,198,142,.16);
+  --cardfont:ui-serif,"New York",Georgia,serif;
+  color-scheme:dark;
+  /* standardfarger (PAO), overstyres per side under */
+  --bg:#1a1511;--surface:#231c17;--rule:#30271f;--rule2:#3d3228;--text:#ece3d4;--muted:#a69a88;--faint:#6f6457;--accent:#a6b89e;--accent-soft:rgba(166,184,158,.13);
+  --ok:#93b4a0;--err:#d08d80;--face:#ebe4d6;--ink:#25221e;--cred:#a4453d;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  background:var(--bg);
+}
+body[data-page="pao"]{--bg:#1a1511;--surface:#231c17;--rule:#30271f;--rule2:#3d3228;--text:#ece3d4;--muted:#a69a88;--faint:#6f6457;--accent:#a6b89e;--accent-soft:rgba(166,184,158,.13)}
+body[data-page="tall"]{--bg:#17151b;--surface:#201d26;--rule:#2e2b36;--text:#e8e4ea;--muted:#9d97a8;--faint:#625c6d;--accent:#cfb9a2;--accent-soft:rgba(207,185,162,.13)}
+body[data-page="pi"]{--bg:#121619;--surface:#192024;--rule:#273037;--text:#dde3e1;--muted:#8794a0;--faint:#56626c;--accent:#d5c29a;--accent-soft:rgba(213,194,154,.12);--ok:#93b4a0;--err:#d08d80}
+body[data-page="kort"]{--bg:#131a16;--surface:#1a241f;--rule:#2b3931;--text:#e5e3d9;--muted:#929e94;--faint:#5f6c64;--accent:#c4a76b;--accent-soft:rgba(196,167,107,.14);--ok:#9cbf9c;--err:#d48a7c;--face:#ebe4d6;--ink:#25221e;--cred:#a4453d}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;transition:background-color .3s ease,color .3s ease}
+button,select,input{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:disabled{cursor:default}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+[hidden]{display:none!important}
+.tg{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;font:700 11px/1 var(--sans);flex:none}
+.tg.p{color:var(--cp);background:var(--cp-bg)}
+.tg.a{color:var(--ca);background:var(--ca-bg)}
+.tg.o{color:var(--co);background:var(--co-bg)}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+@media(max-width:600px){.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--bg)}
+.page{display:none}
+body[data-page="pao"] #page-pao,body[data-page="tall"] #page-tall,body[data-page="pi"] #page-pi,body[data-page="kort"] #page-kort{display:block}
+
+/* ---------- Toppfelt ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--bg);border-bottom:1px solid var(--rule);transition:background-color .3s ease,border-color .3s ease}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:58px;gap:12px}
+.brand{font-size:15px;color:var(--muted)}
+.tabs{display:flex;gap:2px}
+.tabs button{color:var(--muted);padding:8px 14px;border-radius:999px;font-size:15px;transition:color .2s,background-color .2s;white-space:nowrap}
+.tabs button:hover{color:var(--text)}
+.tabs button.on{color:var(--text);background:var(--accent-soft)}
+@media(max-width:640px){.brand{display:none}.top .wrap{justify-content:center}.tabs{width:100%;justify-content:space-between}.tabs button{padding:8px 10px;font-size:15px}}
+
+/* ================= PAO ================= */
+#page-pao{padding-bottom:72px}
+.pao-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 32px;padding:44px 0 22px}
+.pao-title{font-family:var(--serif);font-weight:400;font-size:clamp(52px,8vw,84px);line-height:.9;letter-spacing:-.02em}
+.search{background:var(--surface);border:1px solid var(--rule);border-radius:999px;padding:10px 18px;width:240px;max-width:100%;outline:none;font-size:15px}
+.search::placeholder{color:var(--faint)}
+.search:focus{border-color:var(--accent)}
+.pao-bar{position:sticky;top:calc(env(safe-area-inset-top,0px) + 59px);z-index:20;background:var(--bg);border-bottom:1px solid var(--rule2)}
+.decades{display:flex;gap:2px;overflow-x:auto;padding:10px 0 8px;scrollbar-width:none}
+.decades::-webkit-scrollbar{display:none}
+.decades button{font-family:var(--serif);font-size:16px;padding:4px 11px;border-radius:999px;color:var(--muted);font-variant-numeric:lining-nums tabular-nums}
+.decades button:hover{background:var(--surface);color:var(--text)}
+@media(max-width:600px){.decades{justify-content:space-between;gap:0}.decades button{padding:4px 5px;font-size:15px}}
+.cols{display:grid;grid-template-columns:44px 1fr 1.3fr 1.3fr;gap:20px;padding:4px 0 9px;font-size:13px;color:var(--muted)}
+.cols span{display:flex;align-items:center;gap:7px}
+.decade{scroll-margin-top:150px}
+.dec-head{display:flex;align-items:baseline;gap:14px;padding:30px 0 6px}
+.dec-head h2{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1;font-variant-numeric:lining-nums}
+.dec-head p{color:var(--faint);font-size:14px}
+.row{display:grid;grid-template-columns:44px 1fr 1.3fr 1.3fr;gap:20px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--rule)}
+.row .n{font-family:var(--serif);font-size:21px;color:var(--muted);font-variant-numeric:lining-nums tabular-nums;line-height:1.2}
+.row .c{display:flex;gap:10px;align-items:flex-start;min-width:0;line-height:1.35}
+.row .c .tg{display:none;margin-top:2px}
+.row .c-p{font-family:var(--serif);font-size:18px;line-height:1.3;color:var(--cp)}
+.row .c-a{color:var(--ca);font-size:15px}
+.row .c-o{color:var(--co);font-size:15px}
+@media(max-width:720px){
+  .cols{display:flex;gap:18px;padding:2px 0 10px}
+  .cols span:first-child{display:none}
+  .row{grid-template-columns:36px minmax(0,1fr);gap:6px 10px;padding:13px 0;align-items:start}
+  .row .n{grid-row:1/4;font-size:22px;line-height:1;padding-top:1px}
+  .row .c{grid-column:2}
+  .row .c .tg{display:inline-grid}
+  .row .c-p{font-size:18px}
+  .row .c-a,.row .c-o{font-size:15.5px}
+}
+@media(max-width:600px){
+  .pao-head{flex-wrap:nowrap;align-items:center;gap:16px;padding:20px 0 14px}
+  .pao-title{font-size:46px}
+  .search{flex:1;min-width:0;width:auto}
+  .dec-head{padding:24px 0 2px}
+}
+.empty-note{color:var(--muted);padding:40px 0}
+
+/* ================= TALLTRENER ================= */
+#page-tall{padding-bottom:64px}
+.tt-wrap{max-width:860px}
+.tt-head{padding:44px 0 26px}
+.tt-head h1{font-family:var(--serif);font-weight:400;font-size:clamp(40px,6vw,60px);line-height:1;letter-spacing:-.015em}
+.tt-head p{color:var(--muted);margin-top:12px;max-width:50ch}
+.tt-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(max-width:760px){.tt-grid{grid-template-columns:minmax(0,1fr);gap:8px}}
+.tt-b{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:11px 16px;min-height:90px;min-width:0;transition:border-color .2s,background-color .2s}
+.tt-b.cur{border-color:var(--accent)}
+.tt-b.rev{background:transparent}
+.tt-l{display:flex;flex-direction:column;gap:4px}
+.tt-n{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums;display:flex;justify-content:space-between;gap:10px}
+.tt-n i{font-style:normal;color:var(--accent)}
+.tt-d{font-family:var(--serif);font-size:34px;line-height:1;letter-spacing:.03em;font-variant-numeric:lining-nums tabular-nums;color:var(--text)}
+.tt-r{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:14.5px;line-height:1.25}
+.tt-r .ln{display:grid;grid-template-columns:18px 18px minmax(0,1fr);gap:7px;align-items:center;min-width:0}
+.tt-r .pn{font-style:normal;color:var(--faint);font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.tt-r .tx{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tt-r .c-p .tx{color:var(--cp);font-family:var(--serif);font-size:16px}
+.tt-r .c-a .tx{color:var(--ca)}
+.tt-r .c-o .tx{color:var(--co)}
+.tt-hint{color:var(--faint);font-size:13.5px}
+@media(max-width:600px){
+  #page-tall{padding-bottom:20px}
+  .tt-head{padding:12px 0 10px}
+  .tt-head h1{font-size:28px}
+  .tt-head p{display:none}
+  .tt-grid{gap:6px}
+  .tt-b{gap:14px;padding:8px 12px;min-height:74px;border-radius:12px}
+  .tt-l{gap:2px}
+  .tt-d{font-size:30px}
+  .tt-r{gap:3px;font-size:14px}
+  .tt-r .ln{gap:6px}
+  .tt-r .c-p .tx{font-size:15px}
+}
+.tt-foot{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:30px}
+.tt-sum{color:var(--muted);font-size:15px;text-align:center;min-height:23px}
+.tt-sum b{color:var(--text);font-weight:500}
+.tt-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.tt-main{background:var(--accent);color:#1d1913;padding:13px 30px;border-radius:999px;font-weight:600;min-width:180px}
+.tt-ghost{border:1px solid var(--rule);padding:12px 22px;border-radius:999px}
+.tt-ghost:hover{border-color:var(--faint)}
+.kb{color:var(--faint);font-size:13px;text-align:center;margin-top:16px}
+@media(max-width:600px){.tt-foot{margin-top:12px;gap:8px}.tt-sum{min-height:0;font-size:14px}.tt-main{padding:11px 26px}.tt-ghost{padding:10px 20px}}
+@media(hover:none){.kb{display:none}}
+
+/* ================= PI ================= */
+#page-pi{padding-bottom:40px}
+.pi-hero{display:grid;grid-template-columns:auto 1fr;gap:16px 36px;align-items:end;padding:44px 0 28px}
+@media(max-width:600px){
+  .pi-hero{gap:4px 18px;padding:20px 0 18px;align-items:center}
+  .pi-three{font-size:84px}
+  .pi-intro h1{font-size:21px}
+  .pi-intro .pi-exp{display:none}
+  .pi-rec{margin-top:4px;font-size:14px}
+}
+.pi-three{font-family:var(--mono);font-weight:300;font-size:clamp(100px,16vw,180px);line-height:.78;color:var(--accent);letter-spacing:-.05em}
+.pi-intro h1{font-weight:500;font-size:26px;line-height:1.2}
+.pi-intro p{color:var(--muted);max-width:56ch;margin-top:8px}
+.pi-rec{margin-top:12px;font-size:15px}
+.pi-rec b{font-weight:500;color:var(--accent)}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{padding:8px 16px;border-radius:7px;color:var(--muted);font-size:15px;transition:background-color .2s,color .2s}
+.seg button:hover{color:var(--text)}
+.seg button.on{background:var(--rule);color:var(--text)}
+.seg.small button{padding:6px 12px;font-size:14px}
+.pi-bar{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;margin:22px 0 18px;color:var(--muted);font-size:14px}
+.pi-bar select{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:5px 8px;margin:0 6px}
+.chk{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.chk input{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:1px solid var(--faint);border-radius:5px;display:grid;place-items:center;cursor:pointer}
+.chk input:checked{background:var(--accent);border-color:var(--accent)}
+.chk input:checked::after{content:"";width:8px;height:4px;border-left:2px solid var(--bg);border-bottom:2px solid var(--bg);transform:rotate(-45deg) translate(1px,-1px)}
+.pi-bar .note{color:var(--faint)}
+.btn-line{border:1px solid var(--rule);border-radius:8px;padding:6px 12px;color:var(--text);font-size:14px}
+.btn-line:hover{border-color:var(--faint)}
+.blocks{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px 8px}
+.blocks.with-pao{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.blk{text-align:left;padding:8px 10px 10px;border-radius:8px;display:flex;flex-direction:column;gap:2px;min-width:0}
+button.blk:hover{background:var(--surface)}
+.b-i{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+.b-d{font-family:var(--mono);font-size:21px;letter-spacing:.06em;color:var(--text);line-height:1.3;white-space:nowrap;align-self:flex-start}
+.b-pao{display:flex;flex-direction:column;gap:4px;font-size:12.5px;line-height:1.3;margin-top:6px;min-width:0}
+.b-pao .pl{display:grid;grid-template-columns:16px 15px minmax(0,1fr);gap:5px;align-items:center;min-width:0}
+.b-pao .tg{width:16px;height:16px;font-size:10px;border-radius:4px}
+.b-pao .pn{font-style:normal;color:var(--faint);font-family:var(--mono);font-size:11.5px}
+.b-pao .tx{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b-pao .c-p .tx{color:var(--cp)}
+.b-pao .c-a .tx{color:var(--ca)}
+.b-pao .c-o .tx{color:var(--co)}
+.hid .blk:not(.rev) .b-d{color:transparent;background:radial-gradient(circle,var(--faint) 0 2px,transparent 2.6px) 0 50%/calc(1ch + .06em) 100% repeat-x}
+.hid button.blk{cursor:pointer}
+@media(max-width:600px){
+  .blocks.with-pao{grid-template-columns:minmax(0,1fr);gap:2px}
+  .blocks.with-pao .blk{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:16px;align-items:center;padding:9px 8px}
+  .blocks.with-pao .b-i,.blocks.with-pao .b-d{grid-column:1}
+  .blocks.with-pao .b-pao{grid-column:2;grid-row:1/3;margin-top:0}
+}
+.t-stats{display:flex;flex-wrap:wrap;gap:6px 24px;font-size:15px;color:var(--muted);margin-bottom:14px}
+.t-stats b{color:var(--text);font-weight:500}
+.t-board{min-height:72px}
+.t-board .blk.now{background:var(--surface)}
+.b-d i{font-style:normal;display:inline-block;width:1ch;text-align:center;margin-right:.06em}
+.b-d i.em{border-bottom:1px solid var(--rule);height:1.05em;vertical-align:-.15em}
+.b-d i.cur{border-bottom:2px solid var(--accent);height:1.05em;vertical-align:-.15em;animation:blink 1.1s steps(1) infinite}
+.b-d i.err{color:var(--err);text-decoration:underline;text-underline-offset:4px}
+.b-d i.hint{color:var(--accent)}
+.b-d i.okc{color:var(--ok)}
+@keyframes blink{50%{border-color:transparent}}
+.t-msg{min-height:24px;margin:16px 0 0;font-size:15px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.t-msg .bad{color:var(--err)}
+.t-msg .good{color:var(--ok)}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:26px auto 28px}
+.numpad button{height:54px;border-radius:12px;background:var(--surface);border:1px solid var(--rule);font-family:var(--mono);font-size:22px;transition:background-color .12s}
+.numpad button:active{background:var(--rule)}
+.numpad button.fn{font-family:var(--sans);font-size:15px;color:var(--muted)}
+.d-card{margin:8px auto 0;max-width:520px;text-align:center;padding:40px 24px 32px;border:1px solid var(--rule);border-radius:18px;background:var(--surface);transition:border-color .2s}
+.d-card.ok{border-color:var(--ok)}
+.d-card.bad{border-color:var(--err)}
+.d-q{font-family:var(--mono);font-size:clamp(44px,9vw,64px);font-weight:300;color:var(--accent);line-height:1.1;letter-spacing:.02em}
+.d-sub{color:var(--muted);font-size:14px;margin-top:6px}
+.d-ans{display:flex;justify-content:center;gap:10px;margin-top:28px;font-family:var(--mono);font-size:34px;min-height:52px}
+.d-ans i{font-style:normal;width:1.3ch;border-bottom:2px solid var(--rule);line-height:1.4}
+.d-ans i.f{border-color:var(--faint)}
+.d-ans i.err{color:var(--err);border-color:var(--err)}
+.d-ans i.okc{color:var(--ok);border-color:var(--ok)}
+.d-fb{min-height:24px;margin-top:16px;font-size:15px;color:var(--muted)}
+.d-fb .bad{color:var(--err)}
+.d-fb .good{color:var(--ok)}
+.d-fb b{font-family:var(--mono);font-weight:400;color:var(--text);letter-spacing:.06em}
+.d-score{text-align:center;margin-top:14px;color:var(--muted);font-size:15px}
+
+/* ================= KORT ================= */
+#page-kort{padding-bottom:40px}
+.k-view{padding:36px 0 56px}
+#k-rec{padding-bottom:0}
+#k-setup{text-align:center}
+.pc{--w:120px;width:var(--w);max-width:100%;aspect-ratio:5/7;background:var(--face);border-radius:calc(var(--w)*.075);position:relative;color:var(--ink);font-family:var(--cardfont);box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 14px 34px rgba(0,0,0,.38);flex:none;user-select:none}
+.pc.red{color:var(--cred)}
+.pc .c-ix{position:absolute;left:5.5%;top:4.5%;width:15%;display:flex;flex-direction:column;align-items:center;font-size:calc(var(--w)*.165);line-height:1;font-weight:600;letter-spacing:-.04em;z-index:1}
+.pc .c-ix small{font-size:.72em;font-weight:400;margin-top:.1em;letter-spacing:0}
+.pc .c-ix.b{left:auto;top:auto;right:5.5%;bottom:4.5%;transform:rotate(180deg)}
+.pc .court-art{position:absolute;inset:0;width:100%;height:100%;display:block}
+.pc .c-mid{position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--w)*.44);line-height:1}
+.fan{position:relative;height:196px;width:280px;margin:8px auto 30px}
+.fan .pc{position:absolute;left:50%;bottom:0;margin-left:-60px;transform-origin:50% 135%}
+.fan .pc:nth-child(1){transform:rotate(-15deg)}
+.fan .pc:nth-child(2){transform:translateY(-8px)}
+.fan .pc:nth-child(3){transform:rotate(15deg)}
+.k-title{font-family:var(--didone);font-weight:400;font-size:clamp(50px,8vw,84px);line-height:1;letter-spacing:-.01em}
+.k-sub{color:var(--muted);max-width:44ch;margin:14px auto 0}
+.k-opts{display:flex;justify-content:center;flex-wrap:wrap;gap:24px 44px;margin:36px 0 34px}
+.opt{display:flex;flex-direction:column;gap:10px;align-items:center;color:var(--muted);font-size:14px}
+#page-kort .seg{background:transparent;border:1px solid var(--rule);border-radius:999px;padding:3px}
+#page-kort .seg button{border-radius:999px;padding:7px 16px;min-width:46px}
+#page-kort .seg button.on{background:var(--accent);color:#1b1810}
+.primary{background:var(--accent);color:#1b1810;padding:13px 30px;border-radius:999px;font-weight:600;font-size:16px;transition:filter .15s}
+.primary:hover{filter:brightness(1.07)}
+.ghost{border:1px solid var(--rule);padding:12px 24px;border-radius:999px;color:var(--text);font-size:15px;transition:border-color .15s}
+.ghost:hover{border-color:var(--faint)}
+.k-hist{max-width:440px;margin:44px auto 0;text-align:left}
+.k-hist h3{font-family:var(--didone);font-weight:400;font-size:22px;margin-bottom:8px}
+.k-hist table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.k-hist td{padding:8px 0;border-top:1px solid var(--rule);color:var(--muted)}
+.k-hist td:nth-child(3){color:var(--text)}
+.k-hist td:last-child{text-align:right}
+.k-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;color:var(--muted);font-size:15px}
+.k-top b{color:var(--text);font-weight:500}
+.timer{font-variant-numeric:tabular-nums;color:var(--accent)}
+.k-progress{height:2px;background:var(--rule);border-radius:2px;margin-top:12px;overflow:hidden}
+.k-progress i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+.k-stage{display:flex;justify-content:center;align-items:flex-start;gap:clamp(12px,3vw,28px);margin:44px 0 30px;min-height:300px}
+.k-stage figure{display:flex;flex-direction:column;align-items:center;gap:12px}
+.k-stage figcaption{color:var(--faint);font-size:14px;font-variant-numeric:tabular-nums}
+.k-stage.p1 .pc{--w:clamp(176px,52vw,220px)}
+.k-stage.p2 .pc{--w:clamp(132px,41vw,190px)}
+.k-stage.p3 .pc{--w:clamp(98px,28vw,168px)}
+@media(max-width:600px){.k-stage{margin:28px 0 22px;min-height:0}.k-view{padding-top:22px}}
+.k-ctrl{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:14px}
+.slots{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:6px;margin:18px auto 22px;max-width:760px}
+.slot{aspect-ratio:5/7;border-radius:6px;border:1px dashed var(--rule);position:relative;display:grid;place-items:center;padding:0;min-width:0}
+.slot .s-n{position:absolute;top:2px;left:4px;font-size:10px;color:var(--faint);font-variant-numeric:tabular-nums}
+.slot.filled{border:1px solid transparent;background:var(--face)}
+.slot.filled .s-n{color:#8f8778;background:var(--face);padding:0 2px 1px 1px;border-radius:0 0 3px 0;top:1px;left:2px}
+.slot.cur{outline:2px solid var(--accent);outline-offset:1px}
+.mc{font-family:var(--cardfont);color:var(--ink);display:flex;flex-direction:column;align-items:center;line-height:1;margin-top:6px}
+.mc b{font-weight:600;font-size:clamp(13px,1.7vw,18px)}
+.mc i{font-style:normal;font-size:clamp(12px,1.5vw,16px);margin-top:1px}
+.mc.red{color:var(--cred)}
+.mcc{position:absolute;inset:0;width:100%;height:100%;display:block;border-radius:inherit}
+.mcc text{font-family:var(--cardfont)}
+.slot .s-n{z-index:1}
+@media(max-width:760px){.slots{grid-template-columns:repeat(9,minmax(0,1fr));gap:5px}.slot .s-n{font-size:9px;left:3px}.mc{margin-top:7px}}
+.dock{position:sticky;bottom:0;z-index:15;background:var(--bg);border-top:1px solid var(--rule);margin:0 -24px;padding:14px 24px calc(14px + env(safe-area-inset-bottom))}
+@media(max-width:600px){.dock{margin:0 -16px;padding:10px 16px calc(10px + env(safe-area-inset-bottom))}}
+.picker{display:grid;gap:10px;max-width:760px;margin:0 auto}
+.pick-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pick-row .btns{display:flex;gap:8px}
+.pick-row .ghost,.pick-row .primary{padding:8px 16px;font-size:14px}
+.pick-hint{color:var(--muted);font-size:14px}
+.suits{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.suit{display:flex;flex-direction:column;align-items:center;gap:1px;padding:12px 4px 10px;border-radius:14px;background:var(--surface);border:1px solid var(--rule);transition:border-color .15s,background-color .15s}
+.suit .sy{font-size:30px;line-height:1.05;font-family:var(--cardfont)}
+.suit.red .sy{color:#d08a7f}
+.suit .nm{font-size:15px}
+.suit .lf{font-size:12px;color:var(--faint)}
+.suit.on{border-color:var(--accent);background:var(--accent-soft)}
+.suit:disabled{opacity:.3}
+.ranks{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:6px}
+.rank{height:56px;border-radius:10px;background:var(--face);color:var(--ink);font-family:var(--cardfont);font-size:20px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;transition:opacity .15s,transform .1s}
+.rank:active:not(:disabled){transform:scale(.96)}
+.rank.red{color:var(--cred)}
+.rank small{font-size:13px;font-weight:400;margin-top:2px}
+.rank:disabled{opacity:.16}
+@media(max-width:760px){.ranks{grid-template-columns:repeat(7,minmax(0,1fr))}}
+@media(max-width:600px){.suit{padding:8px 4px 7px}.suit .sy{font-size:24px}.suit .nm{font-size:14px}.suit .lf{font-size:11px}.rank{height:46px;font-size:18px}.rank small{font-size:12px}}
+.k-score{font-family:var(--didone);font-weight:400;font-size:clamp(44px,8vw,72px);text-align:center;line-height:1.05}
+.k-stats{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 32px;margin:14px 0 8px;color:var(--muted);font-size:15px}
+.k-stats b{color:var(--text);font-weight:500}
+.rslots{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:6px;margin:28px auto 26px;max-width:760px}
+@media(max-width:760px){.rslots{grid-template-columns:repeat(9,minmax(0,1fr));gap:6px 5px}}
+.rcell{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.rcell .slot{width:100%;cursor:default}
+.rcell.ok .slot{box-shadow:0 0 0 2px var(--ok)}
+.rcell.err .slot{box-shadow:0 0 0 2px var(--err)}
+.rcell .rc{font-family:var(--cardfont);font-weight:600;font-size:13px;color:var(--err);line-height:1;min-height:13px}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body data-page="pao">
+
+<header class="top">
+  <div class="wrap">
+    <span class="brand">Minnetrening</span>
+    <nav class="tabs" id="tabs" aria-label="Sider">
+      <button type="button" data-p="pao">PAO</button>
+      <button type="button" data-p="tall">Talltrener</button>
+      <button type="button" data-p="pi">Pi</button>
+      <button type="button" data-p="kort">Kortstokk</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ================= 1 PAO ================= -->
+<section id="page-pao" class="page">
+  <div class="wrap">
+    <div class="pao-head">
+      <h1 class="pao-title">PAO</h1>
+      <input type="search" class="search" id="pao-search" placeholder="Søk på tall eller navn" autocomplete="off">
+    </div>
+    <div class="pao-bar">
+      <nav class="decades" id="pao-decades" aria-label="Hopp til tiår"></nav>
+      <div class="cols" aria-hidden="true"><span></span><span><b class="tg p">P</b>Person</span><span><b class="tg a">A</b>Handling</span><span><b class="tg o">O</b>Objekt</span></div>
+    </div>
+    <div id="pao-list"></div>
+    <p class="empty-note" id="pao-empty" hidden>Ingen treff. Prøv et tall som 47, eller et navn.</p>
+  </div>
+</section>
+
+<!-- ================= 2 TALLTRENER ================= -->
+<section id="page-tall" class="page">
+  <div class="wrap tt-wrap">
+    <div class="tt-head">
+      <h1>Talltrener</h1>
+      <p>36 tilfeldige sifre i seks bolker. Se for deg person, handling og objekt, og trykk på bolken for å sjekke.</p>
+    </div>
+    <div class="tt-grid" id="tt-grid"></div>
+    <div class="tt-foot">
+      <p class="tt-sum" id="tt-sum"></p>
+      <div class="tt-btns"><button class="tt-main" id="tt-next"></button><button class="tt-ghost" id="tt-new">Nye tall</button></div>
+    </div>
+    <p class="kb">Mellomrom viser neste bolk. N gir nye tall.</p>
+  </div>
+</section>
+
+<!-- ================= 3 PI ================= -->
+<section id="page-pi" class="page">
+  <div class="wrap">
+    <div class="pi-hero">
+      <div class="pi-three" aria-hidden="true">3,</div>
+      <div class="pi-intro">
+        <h1>500 desimaler</h1>
+        <p class="pi-exp">84 bolker på seks siffer. Hver bolk er ett PAO-bilde: person fra de to første sifrene, handling fra de to neste og objekt fra de to siste.</p>
+        <p class="pi-rec" id="pi-rec"></p>
+      </div>
+    </div>
+    <div class="seg" id="pi-modes">
+      <button data-mode="ov" class="on">Oversikt</button>
+      <button data-mode="test">Test</button>
+      <button data-mode="drill">Bolkdrill</button>
+    </div>
+    <div id="pi-ov">
+      <div class="pi-bar">
+        <label class="chk"><input type="checkbox" id="pi-hide"> Skjul sifre</label>
+        <label class="chk"><input type="checkbox" id="pi-pao"> Vis PAO</label>
+        <span class="note" id="pi-ov-note"></span>
+      </div>
+      <div class="blocks" id="pi-blocks"></div>
+    </div>
+    <div id="pi-test" hidden>
+      <div class="pi-bar">
+        <label>Start fra bolk<select id="t-start"></select></label>
+        <div class="seg small" id="t-kind">
+          <button data-k="live" class="on">Rett underveis</button>
+          <button data-k="end">Sjekk til slutt</button>
+        </div>
+        <button class="btn-line" id="t-reset">Start på nytt</button>
+      </div>
+      <div class="t-stats" id="t-stats"></div>
+      <div class="blocks t-board" id="t-board"></div>
+      <div class="t-msg" id="t-msg"></div>
+      <div class="numpad" id="t-pad"></div>
+    </div>
+    <div id="pi-drill" hidden>
+      <div class="pi-bar">
+        <label>Bolk<select id="d-from"></select>til<select id="d-to"></select></label>
+        <div class="seg small" id="d-dir">
+          <button data-d="b2d" class="on">Bolknummer til sifre</button>
+          <button data-d="d2b">Sifre til bolknummer</button>
+        </div>
+        <div class="seg small" id="d-order">
+          <button data-o="rand" class="on">Tilfeldig</button>
+          <button data-o="seq">I rekkefølge</button>
+        </div>
+      </div>
+      <div class="d-card" id="d-card">
+        <div class="d-q" id="d-q"></div>
+        <div class="d-sub" id="d-sub"></div>
+        <div class="d-ans" id="d-ans"></div>
+        <div class="d-fb" id="d-fb"></div>
+      </div>
+      <p class="d-score" id="d-score"></p>
+      <div class="numpad" id="d-pad"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 4 KORTSTOKK ================= -->
+<section id="page-kort" class="page">
+  <div class="wrap">
+    <div id="k-setup" class="k-view">
+      <div class="fan" id="k-fan" aria-hidden="true"></div>
+      <h1 class="k-title">Kortstokk</h1>
+      <p class="k-sub">Stokken blandes helt tilfeldig. Pugg rekkefølgen, og legg den tilbake kort for kort.</p>
+      <div class="k-opts">
+        <div class="opt"><span>Antall kort</span>
+          <div class="seg" id="k-n"><button data-v="13">13</button><button data-v="26">26</button><button data-v="39">39</button><button data-v="52" class="on">52</button></div>
+        </div>
+        <div class="opt"><span>Kort per visning</span>
+          <div class="seg" id="k-per"><button data-v="1" class="on">1</button><button data-v="2">2</button><button data-v="3">3</button></div>
+        </div>
+      </div>
+      <button class="primary" id="k-start">Bland og start</button>
+      <div class="k-hist" id="k-hist"></div>
+    </div>
+    <div id="k-mem" class="k-view" hidden>
+      <div class="k-top"><span id="k-pos"></span><span>Pugging <span class="timer" id="k-timer">0:00</span></span></div>
+      <div class="k-progress"><i id="k-prog"></i></div>
+      <div class="k-stage" id="k-stage"></div>
+      <div class="k-ctrl"><button class="ghost" id="k-prev">Forrige</button><button class="ghost" id="k-next">Neste</button></div>
+      <div class="k-ctrl"><button class="primary" id="k-torec">Legg kortene</button></div>
+      <p class="kb">Bla med piltastene eller mellomrom.</p>
+    </div>
+    <div id="k-rec" class="k-view" hidden>
+      <div class="k-top"><span id="k-rpos"></span><span>Legging <span class="timer" id="k-rtimer">0:00</span></span></div>
+      <div class="slots" id="k-slots"></div>
+      <p class="kb" style="margin:0 0 18px">H R K S velger sort, deretter A 2–9 0 J Q K. Backspace angrer, piltastene flytter plass.</p>
+      <div class="dock">
+        <div class="picker">
+          <div class="suits" id="k-suits"></div>
+          <div class="pick-row"><p class="pick-hint" id="k-pickhint"></p><div class="btns"><button class="ghost" id="k-undo">Angre</button><button class="primary" id="k-check">Sjekk</button></div></div>
+          <div class="ranks" id="k-ranks"></div>
+        </div>
+      </div>
+    </div>
+    <div id="k-res" class="k-view" hidden>
+      <h2 class="k-score" id="k-score"></h2>
+      <div class="k-stats" id="k-stats"></div>
+      <div class="rslots" id="k-rslots"></div>
+      <div class="k-ctrl"><button class="ghost" id="k-same">Samme stokk igjen</button><button class="primary" id="k-new">Ny stokk</button></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+"use strict";
+/* ---------------- Data ---------------- */
+const PI = "14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196442881097566593344612847564823378678316527120190914564856692346034861045432664821339360726024914127372458700660631558817488152092096282925409171536436789259036001133053054882046652138414695194151160943305727036575959195309218611738193261179310511854807446237996274956735188575272489122793818301194912";
+const BLOCKS = [];
+for (let i = 0; i < PI.length; i += 6) BLOCKS.push(PI.slice(i, i + 6));
+
+const PAO = [
+["Erling Håland","Akrobatisk spark i lufta","Langt gyldent hår"],
+["Edwin van der Sar","Slenger seg etter objektet","Keeperhansker"],
+["Dani Alves","Spiser en banan","Barcelona-hjemmedrakt"],
+["Pepe","To-fotstakler","Gammel lærball"],
+["Virgil van Dijk","Rygger/twerker","Liverpool-drakt og blått kapteinsbind"],
+["Zinedine Zidane","«Headbutter»","VM-pokal"],
+["Paul Pogba","Dabber","Juventus-drakt, gullarmbånd og pannebånd"],
+["Cristiano Ronaldo","SIUUU","Champions League-troféer"],
+["Andrés Iniesta","Løper og feirer rundt i ring","Hvit singlet"],
+["R9 (Ronaldo)","Sparker objektet og feirer","Stort brasiliansk flagg"],
+["Lionel Messi","Elegante kroppsfinter","Mange Ballon d'Or"],
+["Adolf Hitler","Nazihilsen","Tysk uniform med rødt hakekorsbånd"],
+["Kleopatra","Holder en gammel papirrull","Pyramide"],
+["Albert Einstein","Skriver med kritt på tavla","Kritt og tavle"],
+["Napoleon Bonaparte","Rir på en hest","Elegant hatt og blå uniform"],
+["Marie Curie","Blander radioaktive stoffer som er grønn-gule","Tønner med radioaktivt symbol"],
+["Galileo Galilei","Ser i et teleskop","Stjerner"],
+["Isaac Newton","Ser et objekt falle","Eple"],
+["Leonardo da Vinci","Maler","Malerskrin og malestativ"],
+["Mozart","Spiller fiolin","Masse noteark"],
+["Infernape","Flamethrower fra munnen","Brenner fra hodet/manken"],
+["Torterra","Earthquake – hele bakken rister","Trær som vokser"],
+["Empoleon","Går som en pingvin","Gul krone (med nebb)"],
+["Staraptor","Flyr rundt i ring","Vinger eller hårsveisen med rødt på tuppen"],
+["Luxray","«Thunder»","Gule lyn rundt omkring"],
+["Gyarados","Spruter vann over alt","Regnsky"],
+["Garchomp","«Dig» – graver seg ned i gulvet","Sand som blåser"],
+["Gengar","Shadow Ball","Det ondskapsfulle smilet, alt rundt blir mørkt"],
+["Zekrom","«Fusion Bolt» – masse blå elektrisitet","Svart hale som lyser blått og lager elektrisk lyd"],
+["Giratina","«Shadow Force»","Alle tentaklene"],
+["Skrillex","Mikser/DJ-bevegelser","Grått Beats-headset"],
+["Hans Zimmer","Dirigerer","Timeglass"],
+["Kendrick Lamar","Crip walk","Hvit t-skjorte og baggy dongeribukse"],
+["Snoop Dogg","Røyker weed og danser dansen sin","Masse blunts rundt omkring"],
+["ABBA","Danser discodans","Diskokule"],
+["Guthrie Govan","Spiller luftgitarsolo","Brun elektrisk gitar"],
+["Michael Jackson","Moonwalk","Hvite hansker og rød skinnjakke"],
+["Elton John","Spiller piano oppå objektet","Keyboard"],
+["Shakira","Hofte- og magedans","Svart skjørt med mange tråder"],
+["Stevie Wonder","Klapper og synger glad","Munnspill"],
+["Darth Vader","«Force choke» på noen eller noe","Rødt lasersverd"],
+["Darth Maul","Spinner dobbeltsidig sverd","Dobbeltsidig lasersverd"],
+["Palpatine","Spinner rundt som en galning","Kappe som dekker mye av fjeset"],
+["Joker","Smiler og ler overdrevent","Jokerkort"],
+["Bane","Brøler og slår seg på brystet","Ansiktsmaske med rør inn i ryggen"],
+["Dr. Octopus","Bruker fire tentakler aktivt","Lang svart skinnfrakk og runde briller"],
+["Voldemort","Kaster en mørk trylleformel og roper «Avada Kedavra»","Slanger"],
+["Davy Jones","Klyper hendene sammen som en krabbe","Fysisk hjerte"],
+["Skrik","Knivstikker noe eller noen","Kniv"],
+["Gollum","Kryper på alle fire / sitter på huk","Gullring"],
+["Mario","Mario-hopp og roper «Yahoo»","Mario-sopp"],
+["Sonic","Ruller raskt på bakken","Wii-kontroller"],
+["Pac-Man","Gaper jevnlig etter gule pellets","Hvite pellets"],
+["Yoshi","Gaper og skyter ut tunga","Yoshi-egg"],
+["Crash Bandicoot","Hopper rett opp og spinner med armene ut","Aku Aku"],
+["Arthur Morgan","Skyter med en rifle","Rifle"],
+["Steve","Slår konstant på hardt materiale","Pickaxe"],
+["Radahn","Meteoritteksplosjon","Starscourge Greatsword"],
+["Rykard, Lord of Blasphemy","Rødt lys rundt seg (regenererer liv)","Blasphemous Blade"],
+["Rennala","Blir omgjort til en måne","Tryllestaven «Carian Regal Scepter»"],
+["Luke Skywalker","Blir skutt på av en treningsdroide","Grønt lasersverd"],
+["Anakin Skywalker","Har mistet armer og bein, kryper på bakken i smerte","Blått lasersverd"],
+["Patrick Bateman","Veldig aggressiv med tunga ut","Plastlag utenpå med masse blod"],
+["Harry Potter","Roper «Lumos» og blir veldig lys","Ugle"],
+["James Bond","Sikter og skyter med pistol","Den ikoniske grå Aston Martin-bilen"],
+["Indiana Jones","Later som han pisker og lager piskelyd med munnen","Fedora-hatt"],
+["Jack Sparrow","Går ustøtt og sjanglete","Kompass"],
+["Michael Scott","Gjør parkour","Fargerik lekeball"],
+["Daenerys Targaryen","Sier «Dracarys» intenst","Drage"],
+["Walter White","Får hosteanfall","Stor pose med blå meth"],
+["Superman","Skyter laser ut av øynene","Kryptonitt"],
+["Batman","Lager røyk og forsvinner","Batmobile"],
+["Wonder Woman","Slår armbåndene sammen i kryss","Lasso of Truth"],
+["The Flash","Vibrerer hånda og tar den gjennom en vegg","Flash-pin med logo"],
+["Green Lantern","Skaper en grønn gjenstand med ringen","Grønn ring som lyser"],
+["Aquaman","Plystrer og kommanderer","Trident"],
+["Cyborg","Skyter med en armkanon","Robotarm"],
+["Harley Quinn","Bøyer seg fremover","Store aggressive hunder"],
+["Two-Face","Kaster en mynt","Tofarget mynt (den ene siden er brent)"],
+["Scarecrow","Sprayer fryktgass","Scarecrow-maske"],
+["Thanos","Knipser veldig høyt","Infinity Gauntlet med alle steinene"],
+["Scarlet Witch","Kaster rød magi rundt seg","Svart tiara og røde glødende øyne"],
+["Doctor Strange","Åpner en portal til en annen dimensjon","Rød kappe (Cloak of Levitation)"],
+["Thor","Tilkaller objektet til hånden med strak arm","Stormbreaker"],
+["Hulk","Slår objektet ned i bakken gang på gang","Grønnfarget"],
+["Tony Stark","Skyter en stor blå stråle fra magen","Iron Man-drakt"],
+["Captain America","Kaster objektet som spretter tilbake i hånden","Skjold"],
+["Spider-Man","Skyter spindelvev","Spindelvev overalt og edderkopper"],
+["Wolverine","Skader gror, mye brøling","Skarpe klør ut fra hendene"],
+["Hawkeye","Skyter med pil og bue","Piler og bue"],
+["Michael Jordan","Slam dunker","Basketballkurv"],
+["Serena Williams","Slår en kraftig serve","Tennisball"],
+["Usain Bolt","«Lightning pose»-feiringen","OL-gullmedalje"],
+["Mike Tyson","Bokser","Boksehansker og vinnerbeltet"],
+["Tiger Woods","Slår driverslag","Golfkølle"],
+["Michael Phelps","Svømmer butterfly","Svømmehette og svømmebriller"],
+["Tom Brady","Kaster langt","Amerikansk fotballdrakt (store skuldre)"],
+["Lance Armstrong","Sykler","Dopingnåler"],
+["John Cena","«You can't see me»","WWE-mesterskapsbelte"],
+["Petter Northug","Staker kraftig i klassisk stil","Skistaver og ski"]
+];
+
+const THEMES = ["Fotball","Historie og vitenskap","Pokémon","Musikk","Skurker","Spill","Film og serier","DC","Marvel","Idrett"];
+
+/* ---------------- Hjelpere ---------------- */
+const $ = s => document.querySelector(s);
+const pad2 = n => String(n).padStart(2, "0");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const store = {
+  get(k, d){ try { const v = window.localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { window.localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+};
+function randInt(n){ // jevnt fordelt 0..n-1
+  const c = window.crypto || window.msCrypto;
+  if (!c || !c.getRandomValues) return Math.floor(Math.random() * n);
+  const a = new Uint32Array(1), lim = Math.floor(0x100000000 / n) * n; let x;
+  do { c.getRandomValues(a); x = a[0]; } while (x >= lim);
+  return x % n;
+}
+function fmtTime(ms){ const s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ":" + pad2(s % 60); }
+function fmtSec(ms){ return (ms / 1000).toFixed(1).replace(".", ",") + " s"; }
+function segOn(seg, btn){ seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === btn)); }
+
+function eat(e){ e.preventDefault(); const t = e.target; if (t && t.tagName === "BUTTON" && t.blur) t.blur(); }
+
+/* ---------------- Sider ---------------- */
+let page = "pao";
+const PAGES = ["pao","tall","pi","kort"];
+function setPage(p){
+  page = PAGES.includes(p) ? p : "pao";
+  document.body.dataset.page = page;
+  try { document.documentElement.style.backgroundColor = getComputedStyle(document.body).getPropertyValue("--bg").trim(); } catch(e){}
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.p === page));
+  store.set("mt-page", page);
+  if (page === "tall" && !TT.digits) ttNew();
+  window.scrollTo(0, 0);
+}
+
+/* ================= 1 PAO ================= */
+function renderPAO(){
+  let html = "";
+  for (let d = 0; d < 10; d++){
+    html += `<section class="decade" id="dec-${d}"><header class="dec-head"><h2>${d}0–${d}9</h2><p>${THEMES[d]}</p></header>`;
+    for (let n = d * 10; n < d * 10 + 10; n++){
+      const [p, a, o] = PAO[n];
+      html += `<div class="row" data-n="${n}" data-s="${esc(norm(p + " " + a + " " + o))}"><span class="n">${pad2(n)}</span><span class="c c-p"><b class="tg p">P</b><span>${esc(p)}</span></span><span class="c c-a"><b class="tg a">A</b><span>${esc(a)}</span></span><span class="c c-o"><b class="tg o">O</b><span>${esc(o)}</span></span></div>`;
+    }
+    html += "</section>";
+  }
+  $("#pao-list").innerHTML = html;
+  $("#pao-decades").innerHTML = THEMES.map((t, d) => `<button type="button" data-d="${d}" title="${t}">${d}0</button>`).join("");
+}
+function filterPAO(){
+  const q = norm($("#pao-search").value.trim());
+  let any = false;
+  document.querySelectorAll(".decade").forEach(sec => {
+    let vis = 0;
+    sec.querySelectorAll(".row").forEach(r => {
+      const n = +r.dataset.n; let m = true;
+      if (q){
+        if (/^\d{1,2}$/.test(q)) m = q.length === 2 ? pad2(n) === q : pad2(n).startsWith(q) || String(n) === q;
+        else m = r.dataset.s.includes(q);
+      }
+      r.hidden = !m; if (m) vis++;
+    });
+    sec.hidden = vis === 0; if (vis) any = true;
+  });
+  $("#pao-empty").hidden = any;
+}
+function initPAO(){
+  renderPAO();
+  $("#pao-search").addEventListener("input", filterPAO);
+  $("#pao-decades").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if ($("#pao-search").value){ $("#pao-search").value = ""; filterPAO(); }
+    document.getElementById("dec-" + b.dataset.d).scrollIntoView({ block: "start" });
+  });
+}
+
+/* ================= 2 TALLTRENER ================= */
+const TT = { digits:null, rev:[], t:[], last:0 };
+function ttNew(){
+  let s = ""; for (let i = 0; i < 36; i++) s += randInt(10);
+  TT.digits = []; for (let i = 0; i < 6; i++) TT.digits.push(s.slice(i * 6, i * 6 + 6));
+  TT.rev = Array(6).fill(false); TT.t = Array(6).fill(null); TT.last = performance.now();
+  ttRender();
+}
+function ttReveal(i){
+  if (!TT.digits || TT.rev[i]) return;
+  const now = performance.now(); TT.t[i] = now - TT.last; TT.last = now; TT.rev[i] = true;
+  if (TT.rev.every(Boolean)){
+    const avg = TT.t.reduce((a, b) => a + b, 0) / 6;
+    const best = store.get("mt-tt-best", null);
+    if (best == null || avg < best) store.set("mt-tt-best", avg);
+  }
+  ttRender();
+}
+function ttAdvance(){ const i = TT.rev.indexOf(false); if (i < 0) ttNew(); else ttReveal(i); }
+function ttRender(){
+  const cur = TT.rev.indexOf(false);
+  $("#tt-grid").innerHTML = TT.digits.map((d, i) => {
+    const pr = [d.slice(0,2), d.slice(2,4), d.slice(4,6)];
+    const lines = TT.rev[i]
+      ? `<span class="ln c-p"><b class="tg p">P</b><i class="pn">${pr[0]}</i><span class="tx">${esc(PAO[+pr[0]][0])}</span></span>
+         <span class="ln c-a"><b class="tg a">A</b><i class="pn">${pr[1]}</i><span class="tx">${esc(PAO[+pr[1]][1])}</span></span>
+         <span class="ln c-o"><b class="tg o">O</b><i class="pn">${pr[2]}</i><span class="tx">${esc(PAO[+pr[2]][2])}</span></span>`
+      : (i === cur ? `<span class="tt-hint">Se bildet, trykk for å sjekke</span>` : "");
+    return `<button type="button" class="tt-b${TT.rev[i] ? " rev" : ""}${i === cur ? " cur" : ""}" data-i="${i}">
+      <span class="tt-l"><span class="tt-n"><span>Bolk ${i + 1}</span>${TT.rev[i] ? `<i>${fmtSec(TT.t[i])}</i>` : ""}</span><span class="tt-d">${d}</span></span>
+      <span class="tt-r">${lines}</span></button>`;
+  }).join("");
+  const done = cur < 0, best = store.get("mt-tt-best", null);
+  $("#tt-next").textContent = done ? "Nye tall" : `Vis bolk ${cur + 1}`;
+  $("#tt-new").hidden = done;
+  if (done){
+    const avg = TT.t.reduce((a, b) => a + b, 0) / 6, fast = Math.min(...TT.t);
+    $("#tt-sum").innerHTML = `Snitt <b>${fmtSec(avg)}</b> per bolk, raskest ${fmtSec(fast)}.` + (best != null ? ` Beste snitt: ${fmtSec(best)}.` : "");
+  } else {
+    $("#tt-sum").innerHTML = best != null ? `Beste snitt hittil: ${fmtSec(best)}` : "";
+  }
+}
+function initTall(){
+  $("#tt-grid").addEventListener("click", e => { const b = e.target.closest(".tt-b"); if (b) ttReveal(+b.dataset.i); });
+  $("#tt-next").addEventListener("click", ttAdvance);
+  $("#tt-new").addEventListener("click", ttNew);
+}
+function tallKey(e){
+  if (e.key === " " || e.key === "Enter"){ ttAdvance(); eat(e); }
+  else if (e.key.toLowerCase() === "n"){ ttNew(); eat(e); }
+}
+
+/* ================= 3 PI ================= */
+let piMode = "ov";
+const bestKey = "mt-pi-best";
+function piBest(){ return store.get(bestKey, 0); }
+function setBest(v){ if (v > piBest()){ store.set(bestKey, v); renderRec(); } }
+function renderRec(){
+  const b = piBest();
+  $("#pi-rec").innerHTML = b ? `Lengste rekke fra start: <b>${b} siffer</b>, til og med bolk ${Math.ceil(b / 6)}.` : "Ingen rekord ennå. Ta en test fra bolk 1.";
+}
+function paoLines(b){
+  const out = [];
+  if (b.length >= 2) out.push(["p", PAO[+b.slice(0,2)][0], b.slice(0,2)]);
+  if (b.length >= 4) out.push(["a", PAO[+b.slice(2,4)][1], b.slice(2,4)]);
+  if (b.length >= 6) out.push(["o", PAO[+b.slice(4,6)][2], b.slice(4,6)]);
+  return out;
+}
+function renderPiOv(){
+  const hide = $("#pi-hide").checked, pao = $("#pi-pao").checked, g = $("#pi-blocks");
+  g.classList.toggle("with-pao", pao); g.classList.toggle("hid", hide);
+  g.innerHTML = BLOCKS.map((b, i) => {
+    const p = pao ? `<span class="b-pao">${paoLines(b).map(([c, l, pn]) => `<span class="pl c-${c}"><b class="tg ${c}">${c.toUpperCase()}</b><i class="pn">${pn}</i><span class="tx">${esc(l)}</span></span>`).join("")}</span>` : "";
+    return `<button type="button" class="blk" data-i="${i}" ${hide ? "" : 'tabindex="-1"'}><span class="b-i">${i + 1}</span><span class="b-d">${b}</span>${p}</button>`;
+  }).join("");
+  $("#pi-ov-note").textContent = hide ? "Trykk på en bolk for å vise eller skjule den." : "";
+}
+function makePad(el, h){
+  el.innerHTML = ["1","2","3","4","5","6","7","8","9","back","0","ok"].map(k =>
+    `<button type="button" data-k="${k}" class="${k.length > 1 ? "fn" : ""}">${k === "back" ? "Slett" : k === "ok" ? '<span class="oklbl"></span>' : k}</button>`).join("");
+  el.addEventListener("mousedown", e => e.preventDefault());
+  el.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const k = b.dataset.k;
+    if (k === "back") h.back(); else if (k === "ok") h.ok(); else h.digit(k);
+  });
+}
+
+/* --- Test --- */
+const T = { start:0, kind:"live", typed:[], marks:[], done:false, paused:false, errors:0, firstErr:null };
+function tClean(){ return T.firstErr == null ? T.typed.length : T.firstErr; }
+function tReset(){
+  T.start = (+$("#t-start").value - 1) * 6;
+  Object.assign(T, { typed:[], marks:[], done:false, paused:false, errors:0, firstErr:null });
+  $("#t-msg").innerHTML = "";
+  $("#t-pad .oklbl").textContent = T.kind === "live" ? "Hint" : "Sjekk";
+  tRender();
+}
+function tRender(){
+  const sb = T.start / 6, n = T.typed.length;
+  const total = PI.length - T.start;
+  let nb = Math.floor(n / 6) + 1; if (n >= total) nb = Math.ceil(total / 6);
+  let h = "";
+  for (let b = 0; b < nb && sb + b < BLOCKS.length; b++){
+    const bi = sb + b, len = BLOCKS[bi].length; let ds = "";
+    for (let k = 0; k < len; k++){
+      const i = b * 6 + k;
+      if (i < n) ds += `<i class="${T.marks[i]}">${T.typed[i]}</i>`;
+      else if (i === n && !T.done && !T.paused) ds += `<i class="cur"></i>`;
+      else ds += `<i class="em"></i>`;
+    }
+    h += `<div class="blk${b === nb - 1 && !T.done ? " now" : ""}"><span class="b-i">${bi + 1}</span><span class="b-d">${ds}</span></div>`;
+  }
+  $("#t-board").innerHTML = h;
+  const parts = [`<span><b>${n}</b> siffer skrevet</span>`];
+  if (T.kind === "live" || T.done) parts.push(`<span><b>${tClean()}</b> riktige på rad</span>`);
+  if (T.errors) parts.push(`<span><b>${T.errors}</b> feil</span>`);
+  $("#t-stats").innerHTML = parts.join("");
+  const now = $("#t-board .now"); if (now && page === "pi" && piMode === "test") now.scrollIntoView({ block: "nearest" });
+}
+function tInput(d){
+  if (T.done || T.paused) return;
+  const pos = T.start + T.typed.length; if (pos >= PI.length) return;
+  if (T.kind === "live"){
+    const c = PI[pos];
+    if (d === c){
+      T.typed.push(d); T.marks.push("");
+      if (T.start === 0 && T.firstErr == null) setBest(T.typed.length);
+      if (pos + 1 >= PI.length) tFinishLive();
+    } else {
+      T.paused = true; T.errors++;
+      if (T.firstErr == null){ T.firstErr = T.typed.length; if (T.start === 0) setBest(T.firstErr); }
+      $("#t-msg").innerHTML = `<span class="bad">Feil på siffer ${pos + 1}, bolk ${Math.floor(pos / 6) + 1}: du skrev ${d}, riktig er ${c}.</span>
+        <button type="button" class="btn-line" data-act="cont">Fortsett</button><button type="button" class="btn-line" data-act="reset">Start på nytt</button>`;
+    }
+  } else { T.typed.push(d); T.marks.push(""); }
+  tRender();
+}
+function tFinishLive(){
+  T.done = true;
+  $("#t-msg").innerHTML = `<span class="good">Alle 500 er skrevet. ${tClean()} riktige på rad.</span>`;
+}
+function tContinue(){
+  if (!T.paused) return;
+  const pos = T.start + T.typed.length;
+  T.typed.push(PI[pos]); T.marks.push("err"); T.paused = false; $("#t-msg").innerHTML = "";
+  if (pos + 1 >= PI.length) tFinishLive();
+  tRender();
+}
+function tBack(){ if (T.kind !== "end" || T.done) return; T.typed.pop(); T.marks.pop(); tRender(); }
+function tHint(){
+  if (T.done || T.paused) return;
+  const pos = T.start + T.typed.length; if (pos >= PI.length) return;
+  T.typed.push(PI[pos]); T.marks.push("hint");
+  if (T.firstErr == null) T.firstErr = T.typed.length - 1;
+  if (pos + 1 >= PI.length) tFinishLive();
+  tRender();
+}
+function tCheck(){
+  if (T.done || !T.typed.length) return;
+  T.done = true; let first = null, wrong = 0;
+  T.marks = T.typed.map((d, i) => { const ok = d === PI[T.start + i]; if (!ok){ wrong++; if (first == null) first = i; } return ok ? "okc" : "err"; });
+  T.firstErr = first; T.errors = wrong;
+  if (T.start === 0) setBest(tClean());
+  const msg = first == null
+    ? `<span class="good">Feilfritt: ${T.typed.length} siffer.</span>`
+    : `<span class="bad">Første feil på siffer ${T.start + first + 1}, bolk ${Math.floor((T.start + first) / 6) + 1}: du skrev ${T.typed[first]}, riktig er ${PI[T.start + first]}.</span>`;
+  $("#t-msg").innerHTML = msg + `<button type="button" class="btn-line" data-act="reset">Ny runde</button>`;
+  tRender();
+}
+
+/* --- Bolkdrill --- */
+const D = { from:0, to:BLOCKS.length - 1, dir:"b2d", order:"rand", q:null, buf:"", state:"ask", tried:0, ok:0, streak:0, seq:0, timer:null };
+function dPool(){
+  let a = Math.min(D.from, D.to), b = Math.max(D.from, D.to); const out = [];
+  for (let i = a; i <= b; i++){ if (D.dir === "d2b" && BLOCKS[i].length < 6) continue; out.push(i); }
+  return out.length ? out : [0];
+}
+function dExp(){ return D.dir === "b2d" ? BLOCKS[D.q] : String(D.q + 1); }
+function dNext(){
+  clearTimeout(D.timer);
+  const pool = dPool();
+  if (D.order === "seq"){ D.q = pool[D.seq % pool.length]; D.seq++; }
+  else { let q; do { q = pool[randInt(pool.length)]; } while (pool.length > 1 && q === D.q); D.q = q; }
+  D.buf = ""; D.state = "ask"; dRender();
+}
+function dRender(){
+  const card = $("#d-card"); card.classList.toggle("ok", D.state === "ok"); card.classList.toggle("bad", D.state === "bad");
+  const exp = dExp();
+  if (D.dir === "b2d"){
+    $("#d-q").textContent = "Bolk " + (D.q + 1);
+    $("#d-sub").textContent = `Siffer ${D.q * 6 + 1}–${D.q * 6 + exp.length}`;
+    let a = "";
+    for (let i = 0; i < exp.length; i++){
+      const ch = D.buf[i] || "";
+      let cls = ch ? "f" : "";
+      if (D.state !== "ask") cls = ch === exp[i] ? "okc" : "err";
+      a += `<i class="${cls}">${ch}</i>`;
+    }
+    $("#d-ans").innerHTML = a;
+  } else {
+    $("#d-q").textContent = BLOCKS[D.q];
+    $("#d-sub").textContent = "Hvilken bolk er dette?";
+    const ch = D.buf.padEnd(2, " ").split("");
+    const cls = D.state === "ask" ? "f" : (D.state === "ok" ? "okc" : "err");
+    $("#d-ans").innerHTML = ch.map(c => `<i class="${c.trim() ? cls : ""}">${c.trim()}</i>`).join("");
+  }
+  let fb = "";
+  if (D.state === "ok") fb = `<span class="good">Riktig.</span>`;
+  else if (D.state === "bad") fb = `<span class="bad">Riktig svar er</span> <b>${exp}</b>. Trykk Neste.`;
+  else fb = D.dir === "d2b" ? "Skriv bolknummeret og trykk OK." : "";
+  $("#d-fb").innerHTML = fb;
+  $("#d-score").textContent = D.tried ? `${D.ok} av ${D.tried} riktige, ${D.streak} på rad` : "";
+  $("#d-pad .oklbl").textContent = D.state === "ask" ? "OK" : "Neste";
+}
+function dInput(d){
+  if (D.state !== "ask") return;
+  const exp = dExp();
+  if (D.dir === "b2d"){ if (D.buf.length >= exp.length) return; D.buf += d; dRender(); if (D.buf.length === exp.length) dCheck(); }
+  else { if (D.buf.length >= 2) return; D.buf += d; dRender(); }
+}
+function dBack(){ if (D.state === "ask"){ D.buf = D.buf.slice(0, -1); dRender(); } }
+function dEnter(){ if (D.state === "ask"){ if (D.buf.length) dCheck(); } else dNext(); }
+function dCheck(){
+  const exp = dExp();
+  const ok = D.dir === "b2d" ? D.buf === exp : String(+D.buf) === exp;
+  D.tried++; if (ok){ D.ok++; D.streak++; } else D.streak = 0;
+  D.state = ok ? "ok" : "bad"; dRender();
+  if (ok) D.timer = setTimeout(() => { if (D.state === "ok") dNext(); }, 650);
+}
+function setPiMode(m){
+  piMode = m;
+  $("#pi-ov").hidden = m !== "ov"; $("#pi-test").hidden = m !== "test"; $("#pi-drill").hidden = m !== "drill";
+  segOn($("#pi-modes"), $(`#pi-modes [data-mode="${m}"]`));
+  if (m === "drill" && D.q == null) dNext();
+}
+function initPi(){
+  renderRec(); renderPiOv();
+  const opts = BLOCKS.map((b, i) => `<option value="${i + 1}">${i + 1}</option>`).join("");
+  $("#t-start").innerHTML = opts; $("#d-from").innerHTML = opts; $("#d-to").innerHTML = opts;
+  $("#d-to").value = BLOCKS.length;
+  $("#pi-modes").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setPiMode(b.dataset.mode); });
+  $("#pi-hide").addEventListener("change", renderPiOv);
+  $("#pi-pao").addEventListener("change", renderPiOv);
+  $("#pi-blocks").addEventListener("click", e => { if (!$("#pi-hide").checked) return; const b = e.target.closest(".blk"); if (b) b.classList.toggle("rev"); });
+  makePad($("#t-pad"), { digit: tInput, back: tBack, ok: () => T.kind === "live" ? tHint() : tCheck() });
+  makePad($("#d-pad"), { digit: dInput, back: dBack, ok: dEnter });
+  $("#t-start").addEventListener("change", tReset);
+  $("#t-reset").addEventListener("click", tReset);
+  $("#t-kind").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; T.kind = b.dataset.k; segOn($("#t-kind"), b); tReset(); });
+  $("#t-msg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; if (b.dataset.act === "cont") tContinue(); else tReset(); });
+  $("#d-from").addEventListener("change", e => { D.from = +e.target.value - 1; D.seq = 0; dNext(); });
+  $("#d-to").addEventListener("change", e => { D.to = +e.target.value - 1; D.seq = 0; dNext(); });
+  $("#d-dir").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; D.dir = b.dataset.d; segOn($("#d-dir"), b); dNext(); });
+  $("#d-order").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; D.order = b.dataset.o; D.seq = 0; segOn($("#d-order"), b); dNext(); });
+  tReset();
+}
+function piKey(e){
+  if (piMode === "test"){
+    if (/^[0-9]$/.test(e.key)){ tInput(e.key); eat(e); }
+    else if (e.key === "Backspace"){ tBack(); eat(e); }
+    else if (e.key === "Enter"){ if (T.paused) tContinue(); else if (T.kind === "end" && !T.done) tCheck(); eat(e); }
+  } else if (piMode === "drill"){
+    if (/^[0-9]$/.test(e.key)){ dInput(e.key); eat(e); }
+    else if (e.key === "Backspace"){ dBack(); eat(e); }
+    else if (e.key === "Enter"){ dEnter(); eat(e); }
+  }
+}
+
+/* ================= 4 KORTSTOKK ================= */
+const VS = "︎";
+const SUITS = [
+  { name:"Hjerter", sym:"♥", red:true,  key:"h" },
+  { name:"Ruter",   sym:"♦", red:true,  key:"r" },
+  { name:"Kløver",  sym:"♣", red:false, key:"k" },
+  { name:"Spar",    sym:"♠", red:false, key:"s" }
+];
+const RANKS = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+const RKEY = { a:0, "1":0, "2":1, "3":2, "4":3, "5":4, "6":5, "7":6, "8":7, "9":8, "0":9, t:9, j:10, q:11, k:12 };
+const sOf = id => Math.floor(id / 13), rOf = id => id % 13;
+function label(id){ return RANKS[rOf(id)] + SUITS[sOf(id)].sym + VS; }
+/* Bildekort: halv figur tegnes øverst og speiles nederst, som på vanlige spillkort */
+const INK = "#2a2622", SKIN = "#efd8b8", GOLD = "#c9a24a", GOLD2 = "#a8822f", LACE = "#f3ebdc", STEEL = "#d9d5cc";
+const ROBE = `<path d="M20 70 L20 62 Q21 52 34 50 L66 50 Q79 52 80 62 L80 70 Z" style="fill:var(--robe)" stroke="${INK}" stroke-width=".7"/>`;
+const ROBE2 = `<path d="M20 70 L20 62 Q21 52 34 50 L66 50 Q79 52 80 62 L80 70 Z" style="fill:var(--robe2)" stroke="${INK}" stroke-width=".7"/>`;
+const COURT = {
+K: `${ROBE}
+<path d="M44 50 L56 50 L58.5 70 L41.5 70 Z" fill="${GOLD}" stroke="${INK}" stroke-width=".5"/>
+<g style="fill:var(--robe2)"><circle cx="50" cy="56" r="1.3"/><circle cx="50" cy="61.5" r="1.3"/><circle cx="50" cy="67" r="1.3"/></g>
+<g fill="${GOLD}"><circle cx="31" cy="62" r="1.2"/><circle cx="69" cy="62" r="1.2"/><circle cx="36" cy="57" r="1"/><circle cx="64" cy="57" r="1"/><circle cx="37" cy="66.5" r="1"/><circle cx="63" cy="66.5" r="1"/><circle cx="74" cy="66.5" r="1"/></g>
+<path d="M25.8 52 L25.8 20 L27.1 16.5 L28.4 20 L28.4 52 Z" fill="${STEEL}" stroke="${INK}" stroke-width=".5"/>
+<line x1="27.1" y1="21" x2="27.1" y2="51" stroke="#b5b0a6" stroke-width=".4"/>
+<rect x="22.4" y="51.6" width="9.4" height="2.2" rx="1" fill="${GOLD}" stroke="${INK}" stroke-width=".5"/>
+<rect x="26.2" y="53.8" width="1.8" height="4" fill="#4f3a2a"/>
+<circle cx="27.1" cy="58" r="2.5" fill="${SKIN}" stroke="${INK}" stroke-width=".5"/>
+<path d="M35 50.6 Q50 59 65 50.6 Q60 45.6 50 46.6 Q40 45.6 35 50.6 Z" fill="${LACE}" stroke="${INK}" stroke-width=".6"/>
+<rect x="47" y="42.5" width="6" height="5.5" fill="${SKIN}"/>
+<path d="M41.6 37 Q41 29.5 46 28.6 L45 42 Q42.2 41 41.6 37 Z M58.4 37 Q59 29.5 54 28.6 L55 42 Q57.8 41 58.4 37 Z" fill="#6b5640"/>
+<circle cx="50" cy="36.5" r="7.8" fill="${SKIN}" stroke="${INK}" stroke-width=".6"/>
+<path d="M42.4 37.6 Q43.4 47.8 50 49.2 Q56.6 47.8 57.6 37.6 Q55.2 42.8 50 43 Q44.8 42.8 42.4 37.6 Z" fill="#6b5640" stroke="${INK}" stroke-width=".5"/>
+<path d="M45.8 40.8 Q48 39.2 50 40.5 Q52 39.2 54.2 40.8 Q52 41.9 50 41.2 Q48 41.9 45.8 40.8 Z" fill="#6b5640" stroke="${INK}" stroke-width=".3"/>
+<g fill="${INK}"><circle cx="47.1" cy="35.6" r=".8"/><circle cx="52.9" cy="35.6" r=".8"/></g>
+<path d="M45.5 33.7 Q47 32.8 48.5 33.5 M51.5 33.5 Q53 32.8 54.5 33.7 M50 36 L49.2 38.6 L50.6 38.8" stroke="${INK}" stroke-width=".5" fill="none" stroke-linecap="round"/>
+<path d="M41.2 30.6 L40.6 21.4 L45.2 25.6 L50 19.2 L54.8 25.6 L59.4 21.4 L58.8 30.6 Z" fill="${GOLD}" stroke="${INK}" stroke-width=".6" stroke-linejoin="round"/>
+<rect x="41" y="28.4" width="18" height="2.8" fill="${GOLD2}" stroke="${INK}" stroke-width=".5"/>
+<circle cx="50" cy="29.8" r="1.05" style="fill:var(--robe)"/><circle cx="45.2" cy="29.8" r=".75" style="fill:var(--robe2)"/><circle cx="54.8" cy="29.8" r=".75" style="fill:var(--robe2)"/>
+<g fill="${GOLD}" stroke="${INK}" stroke-width=".4"><circle cx="40.6" cy="21.2" r=".9"/><circle cx="50" cy="19" r="1"/><circle cx="59.4" cy="21.2" r=".9"/></g>`,
+
+Q: `<path d="M40.4 37 Q40 26.6 50 26.6 Q60 26.6 59.6 37 L61.2 50.5 Q56.6 49 56 41 L44 41 Q43.4 49 38.8 50.5 Z" fill="#4f3a2a" stroke="${INK}" stroke-width=".5"/>
+${ROBE2}
+<path d="M43 50 Q50 55 57 50 L57.5 70 L42.5 70 Z" style="fill:var(--robe)" stroke="${INK}" stroke-width=".5"/>
+<g fill="${GOLD}"><circle cx="50" cy="58" r="1.1"/><circle cx="50" cy="63.5" r="1.1"/><circle cx="50" cy="68.6" r="1"/><circle cx="35.5" cy="60" r="1.1"/><circle cx="64.5" cy="60" r="1.1"/><circle cx="37" cy="66" r="1"/><circle cx="63" cy="66" r="1"/><circle cx="74" cy="66.5" r="1"/></g>
+<path d="M37 50.4 Q50 56.5 63 50.4 Q58 47 50 47.6 Q42 47 37 50.4 Z" fill="${LACE}" stroke="${INK}" stroke-width=".55"/>
+<rect x="47.2" y="42.5" width="5.6" height="6" fill="${SKIN}"/>
+<circle cx="50" cy="36.6" r="7.6" fill="${SKIN}" stroke="${INK}" stroke-width=".6"/>
+<path d="M42.5 35 Q43.6 28.8 50 28.8 Q56.4 28.8 57.5 35 Q54.5 31.4 50 31.6 Q45.5 31.4 42.5 35 Z" fill="#4f3a2a"/>
+<g fill="${INK}"><circle cx="47.2" cy="36.2" r=".75"/><circle cx="52.8" cy="36.2" r=".75"/></g>
+<path d="M45.9 35.2 L45.3 34.5 M54.1 35.2 L54.7 34.5 M50 37 L49.4 39 L50.5 39.1" stroke="${INK}" stroke-width=".4" fill="none" stroke-linecap="round"/>
+<ellipse cx="50" cy="41" rx="1.7" ry=".75" fill="#a4453d"/>
+<g fill="${GOLD}"><circle cx="42.5" cy="40.4" r=".9"/><circle cx="57.5" cy="40.4" r=".9"/></g>
+<path d="M42.8 30 L43.2 23.4 L46.4 26.4 L50 21.6 L53.6 26.4 L56.8 23.4 L57.2 30 Z" fill="${GOLD}" stroke="${INK}" stroke-width=".55" stroke-linejoin="round"/>
+<rect x="42.8" y="28.2" width="14.4" height="2" fill="${GOLD2}"/>
+<g fill="${LACE}" stroke="${INK}" stroke-width=".35"><circle cx="43.2" cy="23.2" r=".9"/><circle cx="50" cy="21.3" r="1"/><circle cx="56.8" cy="23.2" r=".9"/></g>
+<path d="M28.6 59 Q27.4 48 29 38.5" stroke="#5f7a52" stroke-width="1" fill="none"/>
+<path d="M28.2 49 Q24 46.5 23.6 43.5 Q27 44.5 28.2 49 Z" fill="#6f8a5f" stroke="${INK}" stroke-width=".35"/>
+<g style="fill:var(--robe)" stroke="${INK}" stroke-width=".35"><circle cx="29" cy="33.6" r="2"/><circle cx="31.6" cy="35.6" r="2"/><circle cx="30.6" cy="38.6" r="2"/><circle cx="27.4" cy="38.6" r="2"/><circle cx="26.4" cy="35.6" r="2"/></g>
+<circle cx="29" cy="36.4" r="1.4" fill="${GOLD}" stroke="${INK}" stroke-width=".3"/>
+<circle cx="28.6" cy="59" r="2.4" fill="${SKIN}" stroke="${INK}" stroke-width=".5"/>`,
+
+J: `<line x1="72.6" y1="18" x2="72.6" y2="66" stroke="#6b5640" stroke-width="1.4" stroke-linecap="round"/>
+<path d="M71.9 21 L72.6 14.5 L73.3 21 Z" fill="${STEEL}" stroke="${INK}" stroke-width=".45"/>
+<path d="M73.3 21.5 Q79.6 22.4 80 28.4 Q76.4 26.6 73.3 28.2 Z" fill="${STEEL}" stroke="${INK}" stroke-width=".5"/>
+<path d="M71.9 23 L68.6 24.8 L71.9 25.8 Z" fill="${STEEL}" stroke="${INK}" stroke-width=".4"/>
+${ROBE}
+<path d="M38 50 L50 50 L50 70 L33 70 Z" style="fill:var(--robe2)" stroke="${INK}" stroke-width=".5"/>
+<g fill="${GOLD}"><circle cx="50" cy="55" r=".95"/><circle cx="50" cy="60" r=".95"/><circle cx="50" cy="65" r=".95"/><circle cx="62" cy="58" r="1"/><circle cx="66" cy="64" r="1"/><circle cx="40" cy="60" r="1"/><circle cx="37" cy="66" r="1"/></g>
+<path d="M38 50.4 Q50 55.4 62 50.4 L58 47.2 Q50 49.8 42 47.2 Z" fill="${LACE}" stroke="${INK}" stroke-width=".55"/>
+<rect x="47.2" y="42.5" width="5.6" height="6" fill="${SKIN}"/>
+<path d="M41.4 37 Q41 29.2 50 29.2 Q59 29.2 58.6 37 L59.8 45.6 Q56.6 44 56.6 38.6 L43.4 38.6 Q43.4 44 40.2 45.6 Z" fill="#9a7440" stroke="${INK}" stroke-width=".5"/>
+<circle cx="50" cy="37" r="7.4" fill="${SKIN}" stroke="${INK}" stroke-width=".6"/>
+<g fill="${INK}"><circle cx="47.3" cy="36.6" r=".75"/><circle cx="52.7" cy="36.6" r=".75"/></g>
+<path d="M50 37.4 L49.4 39.4 L50.5 39.5 M48 41.4 Q50 42.6 52 41.4" stroke="${INK}" stroke-width=".45" fill="none" stroke-linecap="round"/>
+<path d="M38.6 31.6 Q38.8 23.4 50 23.4 Q61.2 23.4 61.4 31.6 Q50 28.6 38.6 31.6 Z" style="fill:var(--robe2)" stroke="${INK}" stroke-width=".55"/>
+<path d="M40 31.2 Q50 28.6 60 31.2 L60 33 Q50 30.6 40 33 Z" fill="${GOLD}" stroke="${INK}" stroke-width=".4"/>
+<path d="M56.5 27 Q62 19.5 68.5 14.8 Q66.4 21.6 58.6 28.4 Z" fill="${GOLD}" stroke="${INK}" stroke-width=".45"/>
+<path d="M57.4 27.6 Q62.6 21.4 68.2 15.2" stroke="${GOLD2}" stroke-width=".35" fill="none"/>
+<circle cx="72.6" cy="58" r="2.4" fill="${SKIN}" stroke="${INK}" stroke-width=".5"/>`
+};
+function courtSVG(r, s){
+  const robe = s.red ? "#a4453d" : "#3f5875", robe2 = s.red ? "#3f5875" : "#a4453d";
+  const pipX = r === "J" ? 31 : 69, pipFill = s.red ? "#a4453d" : "#25221e";
+  const half = `<g transform="translate(50 70) scale(.9 1.1) translate(-50 -70)">${COURT[r]}</g><text x="${pipX}" y="19.5" text-anchor="middle" font-size="10" fill="${pipFill}">${s.sym}${VS}</text>`;
+  return `<svg class="court-art" viewBox="0 0 100 140" aria-hidden="true" style="--robe:${robe};--robe2:${robe2}">`
+    + `<rect x="22" y="7" width="56" height="126" rx="2.2" fill="#f4eee2" stroke="${INK}" stroke-width=".7"/>`
+    + `<rect x="23.6" y="8.6" width="52.8" height="122.8" rx="1.4" fill="none" stroke="${GOLD}" stroke-width=".45"/>`
+    + `<g>${half}</g><g transform="rotate(180 50 70)">${half}</g>`
+    + `<line x1="22" y1="70" x2="78" y2="70" stroke="${INK}" stroke-width=".6"/></svg>`;
+}
+function bigCard(id){
+  const s = SUITS[sOf(id)], r = RANKS[rOf(id)], face = rOf(id) >= 10;
+  const ix = `<span class="c-ix">${r}<small>${s.sym}${VS}</small></span><span class="c-ix b">${r}<small>${s.sym}${VS}</small></span>`;
+  const mid = face ? courtSVG(r, s) : `<span class="c-mid">${s.sym}${VS}</span>`;
+  return `<div class="pc${s.red ? " red" : ""}" aria-label="${r} ${s.name}">${mid}${ix}</div>`;
+}
+function miniCourt(r, s){
+  const robe = s.red ? "#a4453d" : "#3f5875", robe2 = s.red ? "#3f5875" : "#a4453d", col = s.red ? "#a4453d" : "#25221e";
+  const half = `<g transform="translate(63 70) scale(.93 1.1) translate(-50 -70)">${COURT[r]}</g>`;
+  return `<svg class="mcc" viewBox="0 0 100 140" aria-hidden="true" style="--robe:${robe};--robe2:${robe2}">`
+    + `<rect x="32" y="4" width="62" height="132" rx="2.5" fill="#f4eee2" stroke="${INK}" stroke-width="1"/>`
+    + `<g>${half}</g><g transform="rotate(180 63 70)">${half}</g>`
+    + `<line x1="32" y1="70" x2="94" y2="70" stroke="${INK}" stroke-width=".8"/>`
+    + `<text x="16" y="66" text-anchor="middle" font-size="31" font-weight="600" fill="${col}">${r}</text>`
+    + `<text x="16" y="94" text-anchor="middle" font-size="26" fill="${col}">${s.sym}${VS}</text></svg>`;
+}
+function miniCard(id){
+  const s = SUITS[sOf(id)], r = RANKS[rOf(id)];
+  if (rOf(id) >= 10) return miniCourt(r, s);
+  return `<span class="mc${s.red ? " red" : ""}"><b>${r}</b><i>${s.sym}${VS}</i></span>`;
+}
+
+const K = { n:52, per:1, deck:[], g:0, ans:[], cur:0, suit:null, undo:[], view:"setup", memStart:0, memT:0, recStart:0, recT:0, tick:null };
+function kShow(v){ ["setup","mem","rec","res"].forEach(x => $("#k-" + x).hidden = x !== v); K.view = v; window.scrollTo(0, 0); }
+function kShuffle(){
+  const a = []; for (let i = 0; i < 52; i++) a.push(i);
+  for (let i = 51; i > 0; i--){ const j = randInt(i + 1); const t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a.slice(0, K.n);
+}
+function kTick(el, start){ clearInterval(K.tick); const f = () => { el.textContent = fmtTime(performance.now() - start); }; f(); K.tick = setInterval(f, 250); }
+function kStart(same){
+  if (!same || K.deck.length !== K.n) K.deck = kShuffle();
+  K.g = 0; K.ans = Array(K.n).fill(null); K.cur = 0; K.suit = null; K.undo = [];
+  K.memStart = performance.now(); kShow("mem"); kTick($("#k-timer"), K.memStart); kRenderMem();
+}
+function kGroups(){ return Math.ceil(K.n / K.per); }
+function kRenderMem(){
+  const a = K.g * K.per, b = Math.min(K.n, a + K.per);
+  const st = $("#k-stage"); st.className = "k-stage p" + (b - a);
+  st.innerHTML = K.deck.slice(a, b).map((id, i) => `<figure>${bigCard(id)}<figcaption>${a + i + 1}</figcaption></figure>`).join("");
+  $("#k-pos").innerHTML = b - a === 1 ? `Kort <b>${a + 1}</b> av ${K.n}` : `Kort <b>${a + 1}–${b}</b> av ${K.n}`;
+  $("#k-prog").style.width = (b / K.n * 100) + "%";
+  const first = K.g === 0, last = K.g >= kGroups() - 1;
+  $("#k-prev").disabled = first; $("#k-prev").style.opacity = first ? .35 : 1;
+  $("#k-next").disabled = last; $("#k-next").style.opacity = last ? .35 : 1;
+}
+function kMove(d){ const g = Math.max(0, Math.min(kGroups() - 1, K.g + d)); if (g !== K.g){ K.g = g; kRenderMem(); } }
+function kToRec(){
+  K.memT = performance.now() - K.memStart; K.recStart = performance.now();
+  kShow("rec"); kTick($("#k-rtimer"), K.recStart); kRenderRec();
+}
+function kRenderRec(){
+  $("#k-slots").innerHTML = K.ans.map((id, i) =>
+    `<button type="button" class="slot${id == null ? "" : " filled"}${i === K.cur ? " cur" : ""}" data-i="${i}" aria-label="Plass ${i + 1}"><span class="s-n">${i + 1}</span>${id == null ? "" : miniCard(id)}</button>`).join("");
+  $("#k-suits").innerHTML = SUITS.map((s, si) => {
+    const left = 13 - K.ans.filter(x => x != null && sOf(x) === si).length;
+    return `<button type="button" class="suit${s.red ? " red" : ""}${K.suit === si ? " on" : ""}" data-s="${si}" ${left === 0 ? "disabled" : ""}><span class="sy">${s.sym}${VS}</span><span class="nm">${s.name}</span><span class="lf">${left} igjen</span></button>`;
+  }).join("");
+  $("#k-ranks").innerHTML = RANKS.map((r, ri) => {
+    const id = K.suit == null ? null : K.suit * 13 + ri;
+    const dis = id == null || K.ans.includes(id);
+    const red = K.suit != null && SUITS[K.suit].red;
+    return `<button type="button" class="rank${red ? " red" : ""}" data-r="${ri}" ${dis ? "disabled" : ""}>${r}${K.suit != null ? `<small>${SUITS[K.suit].sym}${VS}</small>` : ""}</button>`;
+  }).join("");
+  const filled = K.ans.filter(x => x != null).length;
+  $("#k-rpos").innerHTML = filled === K.n ? `Alle <b>${K.n}</b> lagt. Trykk Sjekk.` : `Plass <b>${K.cur + 1}</b> av ${K.n}, ${filled} lagt`;
+  $("#k-pickhint").textContent = K.suit == null ? "Velg sort, så verdi." : `${SUITS[K.suit].name}: velg verdi.`;
+  const cur = $("#k-slots .slot.cur"); if (cur && K.view === "rec") cur.scrollIntoView({ block: "nearest" });
+}
+function kPickSuit(si){ if (K.view !== "rec") return; K.suit = K.suit === si ? null : si; kRenderRec(); }
+function kPlace(ri){
+  if (K.suit == null) return;
+  const id = K.suit * 13 + ri; if (K.ans.includes(id)) return;
+  K.undo.push({ i:K.cur, prev:K.ans[K.cur] });
+  K.ans[K.cur] = id; K.suit = null;
+  for (let k = 1; k <= K.n; k++){ const j = (K.cur + k) % K.n; if (K.ans[j] == null){ K.cur = j; break; } }
+  kRenderRec();
+}
+function kUndo(){
+  if (K.suit != null){ K.suit = null; kRenderRec(); return; }
+  const u = K.undo.pop(); if (!u) return;
+  K.ans[u.i] = u.prev; K.cur = u.i; kRenderRec();
+}
+function kCheck(){
+  clearInterval(K.tick);
+  K.recT = performance.now() - K.recStart;
+  let correct = 0, first = null;
+  K.ans.forEach((id, i) => { if (id === K.deck[i]) correct++; else if (first == null) first = i; });
+  const hist = store.get("mt-kort-hist", []);
+  hist.unshift({ t:Date.now(), n:K.n, c:correct, m:Math.round(K.memT), r:Math.round(K.recT) });
+  store.set("mt-kort-hist", hist.slice(0, 30));
+  $("#k-score").textContent = `${correct} av ${K.n} riktig`;
+  $("#k-stats").innerHTML = [
+    first == null ? "<span><b>Feilfritt</b></span>" : `<span>Første feil på plass <b>${first + 1}</b></span>`,
+    `<span>Pugging <b>${fmtTime(K.memT)}</b></span>`,
+    `<span>Legging <b>${fmtTime(K.recT)}</b></span>`
+  ].join("");
+  $("#k-rslots").innerHTML = K.ans.map((id, i) => {
+    const ok = id === K.deck[i];
+    return `<div class="rcell ${ok ? "ok" : "err"}"><div class="slot${id == null ? "" : " filled"}"><span class="s-n">${i + 1}</span>${id == null ? "" : miniCard(id)}</div><span class="rc">${ok ? "" : label(K.deck[i])}</span></div>`;
+  }).join("");
+  kShow("res");
+}
+function kRenderHist(){
+  const h = store.get("mt-kort-hist", []);
+  if (!h.length){ $("#k-hist").innerHTML = ""; return; }
+  const rows = h.slice(0, 6).map(x => {
+    const d = new Date(x.t);
+    return `<tr><td>${d.getDate()}.${d.getMonth() + 1}.</td><td>${x.n} kort</td><td>${x.c} riktig</td><td>${fmtTime(x.m)} + ${fmtTime(x.r)}</td></tr>`;
+  }).join("");
+  $("#k-hist").innerHTML = `<h3>Siste forsøk</h3><table>${rows}</table>`;
+}
+function initKort(){
+  $("#k-fan").innerHTML = [39, 11, 19].map(bigCard).join("");
+  $("#k-n").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; K.n = +b.dataset.v; segOn($("#k-n"), b); });
+  $("#k-per").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; K.per = +b.dataset.v; segOn($("#k-per"), b); });
+  $("#k-start").addEventListener("click", () => kStart(false));
+  $("#k-prev").addEventListener("click", () => kMove(-1));
+  $("#k-next").addEventListener("click", () => kMove(1));
+  $("#k-torec").addEventListener("click", kToRec);
+  $("#k-slots").addEventListener("click", e => { const b = e.target.closest(".slot"); if (!b) return; K.cur = +b.dataset.i; kRenderRec(); });
+  $("#k-suits").addEventListener("click", e => { const b = e.target.closest(".suit"); if (b && !b.disabled) kPickSuit(+b.dataset.s); });
+  $("#k-ranks").addEventListener("click", e => { const b = e.target.closest(".rank"); if (b && !b.disabled) kPlace(+b.dataset.r); });
+  $("#k-undo").addEventListener("click", kUndo);
+  $("#k-check").addEventListener("click", kCheck);
+  $("#k-same").addEventListener("click", () => kStart(true));
+  $("#k-new").addEventListener("click", () => { kRenderHist(); kShow("setup"); });
+  kRenderHist();
+}
+function kortKey(e){
+  const k = e.key.toLowerCase();
+  if (K.view === "mem"){
+    if (e.key === "ArrowRight" || e.key === " "){ kMove(1); eat(e); }
+    else if (e.key === "ArrowLeft"){ kMove(-1); eat(e); }
+  } else if (K.view === "rec"){
+    if (e.key === "Backspace"){ kUndo(); eat(e); }
+    else if (e.key === "Escape"){ K.suit = null; kRenderRec(); }
+    else if (e.key === "ArrowRight"){ K.cur = Math.min(K.n - 1, K.cur + 1); kRenderRec(); eat(e); }
+    else if (e.key === "ArrowLeft"){ K.cur = Math.max(0, K.cur - 1); kRenderRec(); eat(e); }
+    else if (e.key === "Enter"){ if (K.ans.every(x => x != null)) kCheck(); eat(e); }
+    else if (K.suit == null){ const si = SUITS.findIndex(s => s.key === k); if (si >= 0 && !$(`#k-suits [data-s="${si}"]`).disabled){ kPickSuit(si); eat(e); } }
+    else if (k in RKEY){ kPlace(RKEY[k]); eat(e); }
+  }
+}
+
+/* ---------------- Oppstart ---------------- */
+document.getElementById("tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setPage(b.dataset.p); });
+document.addEventListener("keydown", e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target.closest && e.target.closest("input,select,textarea")) return;
+  if (page === "pi") piKey(e); else if (page === "kort") kortKey(e); else if (page === "tall") tallKey(e);
+});
+initPAO(); initTall(); initPi(); initKort();
+setPage(store.get("mt-page", "pao"));
+
+/* Lagrer appen på telefonen slik at den virker uten nett */
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+}
+</script>
+</body>
+</html>
